@@ -1,6 +1,6 @@
-# PrismGlass
+# HackMineCrafft
 
-**PrismGlass** — Fabric-клиент для Minecraft **1.20.1** с меню в стиле liquid glass, модулями и кастомным UI.
+**HackMineCrafft** — Fabric-клиент для Minecraft **1.20.1** с меню в стиле liquid glass, модулями и кастомным UI.
 
 Открытие меню: **Right Shift**
 
@@ -9,7 +9,7 @@
 1. Установи [Fabric Loader](https://fabricmc.net/use/) для Minecraft 1.20.1
 2. Положи в папку `mods`:
    - [Fabric API 0.92.9+1.20.1](https://modrinth.com/mod/fabric-api)
-   - `prismglass-1.0.0.jar` из [Releases](https://github.com/homychok/PrismGlass/releases)
+   - `hackminecrafft-1.0.0.jar` из [Releases](https://github.com/homychokk/HackMineCrafft/releases)
 3. Запусти игру
 
 ## Возможности
@@ -28,7 +28,7 @@
 gradle build
 ```
 
-Готовый jar: `build/libs/prismglass-1.0.0.jar`
+Готовый jar: `build/libs/hackminecrafft-1.0.0.jar`
 
 ## Лицензия
 

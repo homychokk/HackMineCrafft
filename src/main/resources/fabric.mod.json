@@ -2,8 +2,8 @@
     "schemaVersion": 1,
     "id": "liquidglass",
     "version": "${version}",
-    "name": "PrismGlass",
-    "description": "PrismGlass — Fabric client с liquid glass меню. Right Shift.",
+    "name": "HackMineCrafft",
+    "description": "HackMineCrafft — Fabric client 1.20.1. Right Shift.",
     "authors": [
         "homychok"
     ],
