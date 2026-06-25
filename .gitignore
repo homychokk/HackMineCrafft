@@ -1,0 +1,15 @@
+.gradle/
+build/
+out/
+bin/
+*.iml
+.idea/
+.vscode/
+*.log
+*.class
+*.jar
+!releases/*.jar
+.DS_Store
+Thumbs.db
+run/
+remappedSrc/

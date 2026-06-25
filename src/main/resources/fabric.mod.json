@@ -1,0 +1,28 @@
+{
+    "schemaVersion": 1,
+    "id": "liquidglass",
+    "version": "${version}",
+    "name": "PrismGlass",
+    "description": "PrismGlass — Fabric client с liquid glass меню. Right Shift.",
+    "authors": [
+        "homychok"
+    ],
+    "contact": {},
+    "license": "MIT",
+    "icon": "assets/liquidglass/icon.png",
+    "environment": "client",
+    "entrypoints": {
+        "client": [
+            "com.liquidglass.LiquidGlassClient"
+        ]
+    },
+    "mixins": [
+        "liquidglass.mixins.json"
+    ],
+    "depends": {
+        "minecraft": "~1.20",
+        "fabricloader": ">=0.14.0",
+        "fabric-resource-loader-v0": "*",
+        "java": ">=17"
+    }
+}

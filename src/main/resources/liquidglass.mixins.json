@@ -1,0 +1,23 @@
+{
+    "required": true,
+    "package": "com.liquidglass.mixin",
+    "compatibilityLevel": "JAVA_17",
+    "client": [
+        "KeyboardMixin",
+        "MinecraftClientMixin",
+        "MinecraftClientAttackMixin",
+        "GameRendererMixin",
+        "InGameHudMixin",
+        "CameraMixin",
+        "EntityTargetingMixin",
+        "EntityGlowMixin",
+        "BlockShouldDrawSideMixin",
+        "HeldItemRendererMixin",
+        "LivingEntityFallMixin",
+        "VelocityMixin",
+        "ClientPlayerInteractionMixin"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
+}
