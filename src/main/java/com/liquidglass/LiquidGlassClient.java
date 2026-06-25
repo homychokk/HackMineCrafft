@@ -18,6 +18,6 @@ public class LiquidGlassClient implements ClientModInitializer {
         EspRenderer.register();
         OreEspRenderer.register();
         StorageEspRenderer.register();
-        LOGGER.info("[LiquidGlass] загружено. Открой меню на правый Shift.");
+        LOGGER.info("[PrismGlass] loaded. Open menu with Right Shift.");
     }
 }

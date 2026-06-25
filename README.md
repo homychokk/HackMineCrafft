@@ -9,7 +9,7 @@
 1. Установи [Fabric Loader](https://fabricmc.net/use/) для Minecraft 1.20.1
 2. Положи в папку `mods`:
    - [Fabric API 0.92.9+1.20.1](https://modrinth.com/mod/fabric-api)
-   - `prismglass-1.0.0.jar` из [Releases](../../releases)
+   - `prismglass-1.0.0.jar` из [Releases](https://github.com/homychok/PrismGlass/releases)
 3. Запусти игру
 
 ## Возможности
