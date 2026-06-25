@@ -1,14 +1,23 @@
 # HackMineCrafft
 
-**HackMineCrafft** — Fabric-клиент для Minecraft **1.20.1** с меню в стиле liquid glass, модулями и кастомным UI.
+**HackMineCrafft** — Fabric-клиент для Minecraft **1.20 - 1.20.1** с меню в стиле liquid glass, модулями и кастомным UI.
 
 Открытие меню: **Right Shift**
 
 ## Установка
 
-1. Установи [Fabric Loader](https://fabricmc.net/use/) для Minecraft 1.20.1
+### Для Fabric (1.20 - 1.20.1):
+1. Установи [Fabric Loader](https://fabricmc.net/use/) для Minecraft 1.20 или 1.20.1
 2. Положи в папку `mods`:
-   - [Fabric API 0.92.9+1.20.1](https://modrinth.com/mod/fabric-api)
+   - [Fabric API](https://modrinth.com/mod/fabric-api) (подходящей версии)
+   - `hackminecrafft-1.0.0.jar` из [Releases](https://github.com/homychokk/HackMineCrafft/releases)
+3. Запусти игру
+
+### Для Forge (1.20.1):
+1. Установи Forge для Minecraft 1.20.1
+2. Положи в папку `mods`:
+   - [Sinytra Connector](https://modrinth.com/mod/connector) (версия для 1.20.1)
+   - [Forgified Fabric API](https://modrinth.com/mod/forgified-fabric-api) (версия для 1.20.1)
    - `hackminecrafft-1.0.0.jar` из [Releases](https://github.com/homychokk/HackMineCrafft/releases)
 3. Запусти игру
 
