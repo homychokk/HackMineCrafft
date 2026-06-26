@@ -37,10 +37,7 @@ public class ClickGuiScreen extends Screen {
     private static final float SET_H = 15f;
     private static final float TRACK_W = 56f;
 
-    // Масштаб меню (сохраняется между открытиями в рамках сессии)
-    private static float guiScale = 1.0f;
-    private static final float SCALE_MIN = 0.6f;
-    private static final float SCALE_MAX = 1.8f;
+
 
     private float winX, winY;
     private static int selectedCategory = 0; // запоминается между открытиями
@@ -50,12 +47,11 @@ public class ClickGuiScreen extends Screen {
     private NumberSetting draggingNumber = null;
     private float numTrackX, numTrackW;
 
-    // Прямоугольники кнопок масштаба (заполняются в renderHeader)
-    private float sMinusX, sPlusX, sBtnY, sBtnSize = 16f, sBtnH = 18f, sLblW;
+    // Прямоугольники кнопок масштаба убраны
 
     private long lastNano;
     private float openAnim = 0f;
-    private float selectorY = -1f;
+    private float selectorOffset = -1f;
     private float contentScroll = 0f;
     private float contentScrollTarget = 0f;
     private final float[] catHover = new float[Category.values().length];
@@ -113,15 +109,13 @@ public class ClickGuiScreen extends Screen {
         return this.textRenderer.getWidth(Fonts.t(s));
     }
 
-    // Перевод экранных координат мыши в локальные (с учётом масштаба окна)
+    // Перевод экранных координат мыши в локальные
     private double localX(double mx) {
-        float cx = winX + W / 2f;
-        return cx + (mx - cx) / guiScale;
+        return mx;
     }
 
     private double localY(double my) {
-        float cy = winY + H / 2f;
-        return cy + (my - cy) / guiScale;
+        return my;
     }
 
     @Override
@@ -135,7 +129,7 @@ public class ClickGuiScreen extends Screen {
         int lmx = (int) Math.round(localX(mouseX));
         int lmy = (int) Math.round(localY(mouseY));
 
-        float scale = (0.96f + 0.04f * openAnim) * guiScale;
+        float scale = 0.96f + 0.04f * openAnim;
         float cx = winX + W / 2f;
         float cy = winY + H / 2f;
         ctx.getMatrices().push();
@@ -146,7 +140,6 @@ public class ClickGuiScreen extends Screen {
         RenderUtil.dropShadow(ctx, winX, winY, W, H, 18f, a(Theme.SHADOW));
         RenderUtil.roundedGradient(ctx, winX, winY, W, H, 18f, a(Theme.GLASS_TOP), a(Theme.GLASS_BOTTOM));
         RenderUtil.roundedRect(ctx, winX + 1, winY + 1, W - 2, 24f, 17f, a(Theme.GLASS_HIGHLIGHT));
-        RenderUtil.roundedOutline(ctx, winX, winY, W, H, 18f, 1f, a(Theme.BORDER));
 
         renderHeader(ctx, time, lmx, lmy);
         renderSidebar(ctx, lmx, lmy, dt);
@@ -193,31 +186,13 @@ public class ClickGuiScreen extends Screen {
                 a(Theme.withAlpha(Theme.ACCENT_A, 0.85f)), a(Theme.withAlpha(Theme.ACCENT_B, 0.85f)));
         text(ctx, label, px + 8, py + 5, a(0xFFFFFFFF));
 
-        // --- Регулятор масштаба ---
-        String scaleLabel = Math.round(guiScale * 100) + "%";
-        sLblW = width(scaleLabel);
-        sBtnY = winY + 12;
-        sPlusX = px - 10 - sBtnSize;
-        float lblX = sPlusX - 4 - sLblW;
-        sMinusX = lblX - 4 - sBtnSize;
-
-        boolean minusHover = inside(lmx, lmy, sMinusX, sBtnY, sBtnSize, sBtnH);
-        boolean plusHover = inside(lmx, lmy, sPlusX, sBtnY, sBtnSize, sBtnH);
-        RenderUtil.roundedRect(ctx, sMinusX, sBtnY, sBtnSize, sBtnH, 6f,
-                a(Theme.withAlpha(0xFFFFFFFF, minusHover ? 0.18f : 0.08f)));
-        RenderUtil.roundedRect(ctx, sPlusX, sBtnY, sBtnSize, sBtnH, 6f,
-                a(Theme.withAlpha(0xFFFFFFFF, plusHover ? 0.18f : 0.08f)));
-        text(ctx, "-", sMinusX + (sBtnSize - width("-")) / 2f, sBtnY + 5, a(Theme.TEXT));
-        text(ctx, "+", sPlusX + (sBtnSize - width("+")) / 2f, sBtnY + 5, a(Theme.TEXT));
-        text(ctx, scaleLabel, lblX, sBtnY + 5, a(Theme.TEXT_DIM));
+        // --- Регулятор масштаба удален ---
 
         RenderUtil.roundedGradient(ctx, winX + PAD, winY + TOPBAR - 2, W - PAD * 2, 1.6f, 0.8f,
                 a(Theme.withAlpha(Theme.ACCENT_A, 0.85f)), a(Theme.withAlpha(Theme.ACCENT_B, 0.85f)));
     }
 
-    private void changeScale(float delta) {
-        guiScale = Math.max(SCALE_MIN, Math.min(SCALE_MAX, Math.round((guiScale + delta) * 100f) / 100f));
-    }
+
 
     private void renderSidebar(DrawContext ctx, int mouseX, int mouseY, float dt) {
         Category[] cats = Category.values();
@@ -226,13 +201,14 @@ public class ClickGuiScreen extends Screen {
         float sw = SIDEBAR - PAD - 6;
         float step = CAT_H + CAT_GAP;
 
-        float targetSelY = sy + selectedCategory * step;
-        if (selectorY < 0) selectorY = targetSelY;
-        selectorY = approach(selectorY, targetSelY, 16f, dt);
+        float targetOffset = selectedCategory * step;
+        if (selectorOffset < 0) selectorOffset = targetOffset;
+        selectorOffset = approach(selectorOffset, targetOffset, 16f, dt);
+        float actualSelY = sy + selectorOffset;
 
-        RenderUtil.roundedGradient(ctx, sx, selectorY, sw, CAT_H, 9f,
+        RenderUtil.roundedGradient(ctx, sx, actualSelY, sw, CAT_H, 9f,
                 a(Theme.withAlpha(Theme.ACCENT_A, 0.9f)), a(Theme.withAlpha(Theme.ACCENT_B, 0.9f)));
-        RenderUtil.roundedRect(ctx, sx, selectorY + 6, 3f, CAT_H - 12, 2f, a(0xFFFFFFFF));
+        RenderUtil.roundedRect(ctx, sx, actualSelY + 6, 3f, CAT_H - 12, 2f, a(0xFFFFFFFF));
 
         for (int i = 0; i < cats.length; i++) {
             float cyTop = sy + i * step;
@@ -389,14 +365,7 @@ public class ClickGuiScreen extends Screen {
                 resizing = true;
                 return true;
             }
-            if (inside(mouseX, mouseY, sMinusX, sBtnY, sBtnSize, sBtnH)) {
-                changeScale(-0.1f);
-                return true;
-            }
-            if (inside(mouseX, mouseY, sPlusX, sBtnY, sBtnSize, sBtnH)) {
-                changeScale(0.1f);
-                return true;
-            }
+
 
             // Категории
             Category[] cats = Category.values();
@@ -547,15 +516,6 @@ public class ClickGuiScreen extends Screen {
         if (keyCode == GLFW.GLFW_KEY_DOWN) {
             selectedCategory = (selectedCategory + 1) % Category.values().length;
             contentScrollTarget = 0f;
-            return true;
-        }
-        // Масштаб: + / - (включая нумпад)
-        if (keyCode == GLFW.GLFW_KEY_EQUAL || keyCode == GLFW.GLFW_KEY_KP_ADD) {
-            changeScale(0.1f);
-            return true;
-        }
-        if (keyCode == GLFW.GLFW_KEY_MINUS || keyCode == GLFW.GLFW_KEY_KP_SUBTRACT) {
-            changeScale(-0.1f);
             return true;
         }
         return super.keyPressed(keyCode, scanCode, modifiers);

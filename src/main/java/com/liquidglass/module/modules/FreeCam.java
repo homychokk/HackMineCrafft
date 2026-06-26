@@ -2,23 +2,38 @@ package com.liquidglass.module.modules;
 
 import com.liquidglass.module.Category;
 import com.liquidglass.module.Module;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.LootableContainerBlockEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.ProjectileUtil;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Свободная камера. WASD — движение, Space/Shift — вверх/вниз, мышь — обзор.
  * ПКМ по сундуку — открыть и лутать (прицел от камеры).
+ * При наведении на сундук сверху виден тултип с содержимым.
  */
 public class FreeCam extends Module {
     public static boolean active = false;
     public static double x, y, z;
     public static float yaw, pitch;
+
+    /** Содержимое сундука под прицелом (null = не наведён на сундук). */
+    public static List<ItemStack> chestPreview = null;
+    /** Позиция сундука под прицелом (для отображения названия). */
+    public static BlockPos chestPos = null;
+    /** Название типа контейнера. */
+    public static String chestLabel = null;
 
     private double velX, velY, velZ;
 
@@ -45,6 +60,9 @@ public class FreeCam extends Module {
     public void onDisable() {
         active = false;
         velX = velY = velZ = 0;
+        chestPreview = null;
+        chestPos = null;
+        chestLabel = null;
     }
 
     @Override
@@ -120,9 +138,57 @@ public class FreeCam extends Module {
         if (entityHit != null && entityDist < blockDist) {
             mc.crosshairTarget = entityHit;
             mc.targetedEntity = entityHit.getEntity();
+            chestPreview = null;
+            chestPos = null;
+            chestLabel = null;
         } else {
             mc.crosshairTarget = blockHit;
             mc.targetedEntity = null;
+
+            // Проверяем: есть ли под прицелом контейнер с инвентарём
+            if (blockHit.getType() == HitResult.Type.BLOCK) {
+                BlockPos bp = blockHit.getBlockPos();
+                BlockEntity be = mc.world.getBlockEntity(bp);
+                if (be instanceof LootableContainerBlockEntity container) {
+                    List<ItemStack> items = null;
+                    if (mc.getServer() != null) {
+                        net.minecraft.server.world.ServerWorld sw = mc.getServer().getWorld(mc.world.getRegistryKey());
+                        if (sw != null) {
+                            BlockEntity sbe = sw.getBlockEntity(bp);
+                            if (sbe instanceof LootableContainerBlockEntity sc) {
+                                if (sc.getLootTableId() != null) {
+                                    sc.generateLoot(null);
+                                }
+                                items = new ArrayList<>();
+                                for (int i = 0; i < sc.size(); i++) {
+                                    ItemStack s = sc.getStack(i);
+                                    items.add(s == null ? ItemStack.EMPTY : s.copy());
+                                }
+                            }
+                        }
+                    }
+                    if (items == null) {
+                        items = new ArrayList<>();
+                        for (int i = 0; i < container.size(); i++) {
+                            ItemStack stack = container.getStack(i);
+                            items.add(stack == null ? ItemStack.EMPTY : stack.copy());
+                        }
+                    }
+                    chestPreview = items;
+                    chestPos = bp;
+                    // Получаем читаемое название блока
+                    chestLabel = mc.world.getBlockState(bp).getBlock()
+                            .getName().getString();
+                } else {
+                    chestPreview = null;
+                    chestPos = null;
+                    chestLabel = null;
+                }
+            } else {
+                chestPreview = null;
+                chestPos = null;
+                chestLabel = null;
+            }
         }
     }
 }

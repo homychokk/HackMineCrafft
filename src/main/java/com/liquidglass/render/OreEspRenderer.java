@@ -113,7 +113,15 @@ public final class OreEspRenderer {
                 for (int dz = -radius; dz <= radius; dz++) {
                     p.set(center.getX() + dx, center.getY() + dy, center.getZ() + dz);
                     Block b = mc.world.getBlockState(p).getBlock();
-                    if (XRayBlocks.isOre(b)) {
+                    boolean shouldGlow = false;
+                    String espMode = ((XRay) ModuleManager.get("XRay")).espMode.get();
+                    if ("Только ценные".equals(espMode)) {
+                        shouldGlow = XRayBlocks.isValuable(b);
+                    } else {
+                        shouldGlow = XRayBlocks.isOre(b);
+                    }
+
+                    if (shouldGlow) {
                         CACHE.add(new int[]{p.getX(), p.getY(), p.getZ(), baseColor(b)});
                     }
                 }

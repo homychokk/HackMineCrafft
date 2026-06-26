@@ -3,10 +3,12 @@ package com.liquidglass.gui;
 import com.liquidglass.module.Category;
 import com.liquidglass.module.Module;
 import com.liquidglass.module.ModuleManager;
+import com.liquidglass.module.modules.FreeCam;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -85,7 +87,115 @@ public final class HudManager {
         if (ModuleManager.isEnabled("Keystrokes")) {
             renderKeystrokes(ctx, mc, 14, sh - 92);
         }
+
+        // FreeCam: тултип содержимого сундука под прицелом
+        if (FreeCam.active && FreeCam.chestPreview != null) {
+            renderChestTooltip(ctx, mc, sw, sh);
+        }
     }
+
+    // ─────────────────────────────────────────────────────────
+    //  Тултип содержимого сундука (FreeCam)
+    // ─────────────────────────────────────────────────────────
+
+    // Столбцов в строке
+    private static final int COLS = 9;
+    // Размер одной ячейки (иконка 16 + отступ)
+    private static final int CELL = 18;
+    // Отступ внутри тултипа
+    private static final int PAD = 8;
+
+    private static void renderChestTooltip(DrawContext ctx, MinecraftClient mc, int sw, int sh) {
+        List<ItemStack> items = FreeCam.chestPreview;
+        String label = FreeCam.chestLabel != null ? FreeCam.chestLabel : "Сундук";
+
+        // Координаты сундука в строку
+        String posStr = FreeCam.chestPos != null
+                ? FreeCam.chestPos.getX() + ", " + FreeCam.chestPos.getY() + ", " + FreeCam.chestPos.getZ()
+                : "";
+
+        // Считаем количество строк сетки (ровно столько, сколько слотов)
+        int rows = Math.max(1, (int) Math.ceil((double) items.size() / COLS));
+
+        int gridW = COLS * CELL;
+        int gridH = rows * CELL;
+
+        // Заголовок
+        var tr = mc.textRenderer;
+        int labelW = tr.getWidth(Fonts.t(label));
+        int posW = tr.getWidth(Fonts.t(posStr));
+        int headerW = Math.max(labelW, posW);
+
+        int panelW = Math.max(gridW, headerW) + PAD * 2;
+        // Высота: заголовок (9px) + координаты (8px) + разделитель (6px) + сетка + отступы
+        int headerH = 9 + (posStr.isEmpty() ? 0 : 8) + 6;
+        int panelH = PAD + headerH + gridH + PAD;
+
+        // Позиционируем по центру-верху экрана, чуть ниже прицела (y = 20% от высоты)
+        int px = (sw - panelW) / 2;
+        int py = sh / 5;
+
+        // Фон тултипа
+        RenderUtil.dropShadow(ctx, px, py, panelW, panelH, 10f, 0x55000000);
+        RenderUtil.roundedGradient(ctx, px, py, panelW, panelH, 10f,
+                0xD4141322, 0xD40C0A16);
+        // Верхняя акцентная полоска
+        RenderUtil.roundedGradient(ctx, px, py, panelW, 2f, 1f,
+                Theme.withAlpha(Theme.ACCENT_A, 0.9f), Theme.withAlpha(Theme.ACCENT_B, 0.9f));
+        // Внешняя рамка
+        RenderUtil.roundedOutline(ctx, px, py, panelW, panelH, 10f, 1f, 0x4AFFFFFF);
+
+        int textX = px + PAD;
+        int textY = py + PAD;
+
+        // Название контейнера
+        ctx.drawText(tr, Fonts.t(label), textX, textY, Theme.TEXT, true);
+        textY += 10;
+
+        // Координаты (мелким текстом)
+        if (!posStr.isEmpty()) {
+            ctx.drawText(tr, Fonts.t(posStr), textX, textY, Theme.TEXT_FAINT, false);
+            textY += 9;
+        }
+
+        // Горизонтальный разделитель
+        textY += 2;
+        RenderUtil.roundedRect(ctx, px + PAD, textY, panelW - PAD * 2, 1f, 0f,
+                0x33FFFFFF);
+        textY += 4;
+
+        // Подсказка про ПКМ
+        long nonEmpty = items.stream().filter(s -> s != null && !s.isEmpty()).count();
+        String hint = nonEmpty == 0 ? "Пусто • ПКМ — открыть" : "ПКМ — открыть • Предметов: " + nonEmpty;
+        ctx.drawText(tr, Fonts.t(hint), textX, textY, Theme.TEXT_FAINT, false);
+        textY += 10;
+
+        // ── Сетка предметов ──────────────────────────────────
+        int startX = px + PAD;
+        for (int i = 0; i < rows * COLS; i++) {
+            int col = i % COLS;
+            int row = i / COLS;
+            int cellX = startX + col * CELL;
+            int cellY = textY + row * CELL;
+
+            // Фон ячейки
+            RenderUtil.roundedRect(ctx, cellX, cellY, CELL - 1, CELL - 1, 3f,
+                    0x66000000);
+
+            // Предмет
+            if (i < items.size()) {
+                ItemStack stack = items.get(i);
+                // Рисуем иконку предмета (встроенный метод DrawContext)
+                ctx.drawItem(stack, cellX + 1, cellY + 1);
+                // Количество (встроенный метод)
+                ctx.drawItemInSlot(tr, stack, cellX + 1, cellY + 1);
+            }
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────
+    //  Клавиши
+    // ─────────────────────────────────────────────────────────
 
     private static void renderKeystrokes(DrawContext ctx, MinecraftClient mc, int x, int y) {
         int s = 16, gap = 2;

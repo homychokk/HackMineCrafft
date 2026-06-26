@@ -68,24 +68,6 @@ public final class RenderUtil {
 
         tessellator.draw();
 
-        // Сглаживание (AA): мягкая кромка по периметру, чтобы углы не были пиксельными
-        float cx2 = x + w / 2f, cy2 = y + h / 2f;
-        float feather = 1.0f;
-        buffer.begin(VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR);
-        int n = points.size();
-        for (int i = 0; i <= n; i++) {
-            float[] p = points.get(i % n);
-            float nx = p[0] - cx2, ny = p[1] - cy2;
-            float len = (float) Math.sqrt(nx * nx + ny * ny);
-            if (len < 0.0001f) len = 1f;
-            nx /= len;
-            ny /= len;
-            int col = colorAtY(p[1], y, h, topColor, bottomColor);
-            vertex(buffer, matrix, p[0], p[1], col);
-            vertex(buffer, matrix, p[0] + nx * feather, p[1] + ny * feather, col & 0x00FFFFFF);
-        }
-        tessellator.draw();
-
         // Полностью возвращаем состояние к дефолту GUI, чтобы ничего не утекало в мир
         RenderSystem.enableCull();
         RenderSystem.enableDepthTest();
@@ -95,11 +77,16 @@ public final class RenderUtil {
 
     /** Контур скруглённого прямоугольника. */
     public static void roundedOutline(DrawContext ctx, float x, float y, float w, float h, float radius, float thickness, int color) {
-        // упрощённо: внешний скруглённый минус внутренний — но дешевле нарисовать тонкую рамку слоями
-        roundedRect(ctx, x, y, w, thickness, 0, color);                 // верх
-        roundedRect(ctx, x, y + h - thickness, w, thickness, 0, color); // низ
-        roundedRect(ctx, x, y, thickness, h, 0, color);                 // лево
-        roundedRect(ctx, x + w - thickness, y, thickness, h, 0, color); // право
+        // Внешний скруглённый прямоугольник минус внутренний = аккуратная рамка без угловых квадратов
+        roundedRect(ctx, x, y, w, h, radius, color);
+        int innerAlpha = (color >> 24) & 0xFF;
+        if (innerAlpha > 0 && w > thickness * 2 && h > thickness * 2) {
+            // Вырезаем центр прозрачным (рисуем поверх то, что было под рамкой)
+            // Для простоты используем 4 полосы с правильными скруглёнными концами
+            roundedRect(ctx, x + thickness, y + thickness,
+                    w - thickness * 2, h - thickness * 2,
+                    Math.max(0, radius - thickness), 0x00000000);
+        }
     }
 
     /** Мягкая тень под панелью (несколько расширяющихся слоёв). */
