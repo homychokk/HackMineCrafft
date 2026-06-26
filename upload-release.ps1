@@ -26,18 +26,20 @@ if (-not $remote) {
 git push -u origin main --force
 
 $notes = @"
-HackMineCrafft 1.0.0 for Minecraft 1.20.1 (Fabric).
+HackMineCrafft 1.0.1 for Minecraft 1.20.1 (Fabric).
 
+Added Singleplayer chest preview support and FreeCam interact fix.
+XRay now supports highlighting only valuables.
 Requires Fabric API 0.92.9+1.20.1.
 Open menu: Right Shift.
 "@
 
-gh release create v1.0.0 "releases/hackminecrafft-1.0.0.jar" --title "HackMineCrafft 1.0.0" --notes $notes 2>$null
+gh release create v1.0.1 "releases/hackminecrafft-1.0.1.jar" --title "HackMineCrafft 1.0.1" --notes $notes 2>$null
 if ($LASTEXITCODE -ne 0) {
-    gh release upload v1.0.0 "releases/hackminecrafft-1.0.0.jar" --clobber 2>$null
+    gh release upload v1.0.1 "releases/hackminecrafft-1.0.1.jar" --clobber 2>$null
     if ($LASTEXITCODE -ne 0) {
-        gh release create v1.0.0 "releases/hackminecrafft-1.0.0.jar" --title "HackMineCrafft 1.0.0" --notes $notes
+        gh release create v1.0.1 "releases/hackminecrafft-1.0.1.jar" --title "HackMineCrafft 1.0.1" --notes $notes
     }
 }
 
-Write-Host "Release: https://github.com/homychokk/HackMineCrafft/releases/tag/v1.0.0"
+Write-Host "Release: https://github.com/homychokk/HackMineCrafft/releases/tag/v1.0.1"
