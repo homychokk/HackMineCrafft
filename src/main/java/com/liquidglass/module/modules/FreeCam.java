@@ -156,9 +156,6 @@ public class FreeCam extends Module {
                         if (sw != null) {
                             BlockEntity sbe = sw.getBlockEntity(bp);
                             if (sbe instanceof LootableContainerBlockEntity sc) {
-                                if (sc.getLootTableId() != null) {
-                                    sc.generateLoot(null);
-                                }
                                 items = new ArrayList<>();
                                 for (int i = 0; i < sc.size(); i++) {
                                     ItemStack s = sc.getStack(i);

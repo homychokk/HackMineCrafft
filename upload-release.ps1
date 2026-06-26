@@ -4,6 +4,9 @@ Set-Location $PSScriptRoot
 
 $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
 
+# Очищаем GITHUB_TOKEN, чтобы скрипт использовал авторизацию keyring, если токен невалидный
+$env:GITHUB_TOKEN = $null
+
 gh auth status
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Run first: gh auth login -h github.com -p https -w"
